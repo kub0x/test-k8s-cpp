@@ -41,6 +41,7 @@ stages:
       displayName: Deploy job
       pool:
         vmImage: $(vmImageName)
+      environment: dummytest
       strategy:
         runOnce:
           deploy:
