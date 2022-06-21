@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: testing
+  name: dummy-deployment
+  labels:
+    app: dummytest
+spec:
+  selector:
+    matchLabels:
+      app: dummytest
+  template:
+    metadata:
+      labels:
+        app: dummytest
+    spec:
+      containers:
+      - name: dummytest
+        image: dummypoc.azurecr.io/dummy:latest
+      imagePullSecrets:
+        - name: acr-credentials
