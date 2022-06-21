@@ -1,0 +1,56 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    displayName: Build stage
+    jobs:  
+    - job: Build
+      displayName: Build job
+      pool:
+        vmImage: $(vmImageName)
+      steps:
+      - task: Docker@2
+        displayName: Build and push an image to container registry
+        inputs:
+          command: buildAndPush
+          repository: $(acr-repo)
+          dockerfile: Dockerfile
+          containerRegistry: $(acr-name)
+          tags: |
+            $(tag)
+
+      - task: PublishPipelineArtifact@1
+        inputs:
+          artifactName: 'manifests'
+          path: 'manifests'
+
+  - stage: Deploy
+    displayName: Deploy stage
+    dependsOn: Build
+    jobs:
+    - deployment: Deploy
+      displayName: Deploy job
+      pool:
+        vmImage: $(vmImageName)
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: Kubernetes@1
+              displayName: kubectl apply for secretType dockerRegistry
+              inputs:
+                azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+                azureResourceGroup: $(azureResourceGroup)
+                kubernetesCluster: $(kubernetesCluster)
+                command: apply
+                arguments: -f deployment.yaml
+
