@@ -43,6 +43,7 @@ stages:
               displayName: kubectl apply for secretType dockerRegistry
               inputs:
                 azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+                kubernetesServiceEndpoint: $(kubernetesCluster)
                 azureResourceGroup: $(azureResourceGroup)
                 kubernetesCluster: $(kubernetesCluster)
                 command: apply
