@@ -7,7 +7,9 @@ trigger:
 - master
 
 pool:
-  vmImage: ubuntu-latest
+    name: Default
+    Demands:
+    - agent.name -equals $(AGENT_NAME)
 
 stages:
   - stage: Build
