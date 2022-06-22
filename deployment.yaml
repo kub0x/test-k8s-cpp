@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: dummytest
-        image: dummypoc.azurecr.io/dummy:latest
+        image: dummypoc.azurecr.io/dummytest:latest
       imagePullSecrets:
         - name: acr-credentials
