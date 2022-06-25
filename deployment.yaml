@@ -17,8 +17,10 @@ spec:
       containers:
       - name: <CONTAINER>
         image: <IMAGE>
-      resources:
-        requests:
-          cpu: 100m
-        limits:
-          cpu: 100m
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100"
+          limits:
+            memory: "128Mi"
+            cpu: "150"
