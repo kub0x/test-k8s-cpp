@@ -38,13 +38,13 @@ jobs:
           sed -i 's|<IMAGE>|${{ secrets.REGISTRY_NAME }}/$REPO_NAME:'${TAG}'|' $GITHUB_WORKSPACE/deployment.yaml
           sed -i 's|<DEPLOY-NAME>|$REPO_NAME|' $GITHUB_WORKSPACE/deployment.yaml
           sed -i 's|<CONTAINER>|$REPO_NAME|' $GITHUB_WORKSPACE/deployment.yaml
-          sed -i 's|<NAMESPACE>|$GITHUB_REF_NAME|' $GITHUB_WORKSPACE/deployment.yaml
+          sed -i 's|<NAMESPACE>|${{ github.ref_name }}|' $GITHUB_WORKSPACE/deployment.yaml
 
       - name: Save DigitalOcean kubeconfig with short-lived credentials
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ secrets.CLUSTER_NAME }}
 
       - name : Create namespace if doesn't exist
-        run: kubectl create namespace $GITHUB_REF_NAME --dry-run=client -o yaml | kubectl apply -f -
+        run: kubectl create namespace ${{ github.ref_name }} --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to DigitalOcean Kubernetes
         run: kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml
