@@ -1,21 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: testing
-  name: dummy-deployment
+  namespace: <NAMESPACE>
+  name: <DEPLOY-NAME>
   labels:
-    app: dummytest
+    app: <DEPLOY-NAME>
 spec:
   selector:
     matchLabels:
-      app: dummytest
+      app: <DEPLOY-NAME>
   template:
     metadata:
       labels:
-        app: dummytest
+        app: <DEPLOY-NAME>
     spec:
       containers:
-      - name: dummytest
-        image: dummypoc.azurecr.io/dummytest:latest
-      imagePullSecrets:
-        - name: acr-credentials
+      - name: <CONTAINER>
+        image: <IMAGE>
+      resources:
+        requests:
+          cpu: 100m
+        limits:
+          cpu: 100m
