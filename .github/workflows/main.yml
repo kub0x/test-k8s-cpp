@@ -25,7 +25,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'Running workflow $GITHUB_WORKFLOW with ID $GITHUB_RUN_ID related to commit $GITHUB_SHA.'
+          args: 'Running workflow {{ GITHUB_WORKFLOW }} with ID {{ GITHUB_RUN_ID }} related to commit {{ GITHUB_SHA }}.'
       
       - name : Get repository name
         run: echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
@@ -64,4 +64,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'Workflow $GITHUB_WORKFLOW with ID $GITHUB_RUN_ID related to commit $GITHUB_SHA succeeded.'
+          args: 'Workflow {{ GITHUB_WORKFLOW }} with ID {{ GITHUB_RUN_ID }} related to commit {{ GITHUB_SHA }} succeeded.'
