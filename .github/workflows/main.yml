@@ -43,7 +43,7 @@ jobs:
 
       - name: Push image to DigitalOcean Container Registry
         id: docker-push
-        run: docker push ${{ secrets.REGISTRY_NAME1 }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7)
+        run: docker push ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7)
         
       - name: Check for docker push error
         if: failure() && steps.docker-push.outcome == 'failure'
