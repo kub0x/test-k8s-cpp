@@ -29,9 +29,10 @@ jobs:
       - name: Build container image
         id: docker-build
         run: docker build -t ${{ secrets.REGISTRY_NAME1 }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
+        continue-on-error: true
         
       - name: Check for docker build error
-        if: failure() && steps.docker-build.outcome != 'success'
+        if: steps.docker-build.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
@@ -44,9 +45,10 @@ jobs:
       - name: Push image to DigitalOcean Container Registry
         id: docker-push
         run: docker push ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7)
+        continue-on-error: true
         
       - name: Check for docker push error
-        if: failure() && steps.docker-push.outcome != 'success'
+        if: steps.docker-push.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
@@ -71,9 +73,10 @@ jobs:
       - name: Deploy to DigitalOcean Kubernetes
         id: k8s-apply
         run: kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml
+        continue-on-error: true
         
       - name: Check for kubectl apply error
-        if: failure() && steps.k8s-apply.outcome != 'success'
+        if: steps.k8s-apply.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
@@ -83,9 +86,10 @@ jobs:
       - name: Verify deployment
         id: k8s-verify
         run: kubectl rollout status deployment/$REPO_NAME --namespace ${{ github.ref_name }}
+        continue-on-error: true
         
       - name: Check for kubeclt rollout error
-        if: failure() && steps.k8s-verify.outcome != 'success'
+        if: steps.k8s-verify.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
