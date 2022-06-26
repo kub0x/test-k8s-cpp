@@ -27,7 +27,7 @@ jobs:
         run: echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
 
       - name: Build container image
-        run: docker build -t ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
+        run: docker build -t ${{ secrets.REGISTRY_NAME1 }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
         
       - name: Check for docker build error
         if: failure()
