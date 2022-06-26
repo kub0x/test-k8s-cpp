@@ -19,6 +19,13 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'Running workflow $GITHUB_WORKFLOW with ID $GITHUB_RUN_ID related to commit $GITHUB_SHA.'
       
       - name : Get repository name
         run: echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
@@ -51,3 +58,10 @@ jobs:
 
       - name: Verify deployment
         run: kubectl rollout status deployment/$REPO_NAME --namespace ${{ github.ref_name }}
+
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'Workflow $GITHUB_WORKFLOW with ID $GITHUB_RUN_ID related to commit $GITHUB_SHA succeeded.'
