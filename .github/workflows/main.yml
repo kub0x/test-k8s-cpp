@@ -27,10 +27,11 @@ jobs:
         run: echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
 
       - name: Build container image
-        run: docker build -t ${{ secrets.REGISTRY_NAME1 }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
+        id: docker-build
+        run: docker build -t ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
         
       - name: Check for docker build error
-        if: failure()
+        if: failure() && steps.docker-build.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
@@ -41,10 +42,11 @@ jobs:
         run: doctl registry login --expiry-seconds 1200
 
       - name: Push image to DigitalOcean Container Registry
+        id: docker-push
         run: docker push ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7)
         
       - name: Check for docker push error
-        if: failure()
+        if: failure() && steps.docker-push.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
@@ -67,10 +69,11 @@ jobs:
         run: kubectl create namespace ${{ github.ref_name }} --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to DigitalOcean Kubernetes
+        id: k8s-apply
         run: kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml
         
       - name: Check for kubectl apply error
-        if: failure()
+        if: failure() && steps.k8s-apply.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
@@ -78,10 +81,11 @@ jobs:
           args: 'Workflow with ID {{ GITHUB_RUN_ID }} failed. Could not deploy to k8s.'
 
       - name: Verify deployment
+        id: k8s-verify
         run: kubectl rollout status deployment/$REPO_NAME --namespace ${{ github.ref_name }}
         
       - name: Check for kubeclt rollout error
-        if: failure()
+        if: failure() && steps.k8s-verify.outcome != 'success'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
