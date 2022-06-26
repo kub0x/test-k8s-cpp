@@ -28,6 +28,8 @@ jobs:
 
       - name: Build container image
         run: docker build -t ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
+        
+      - name: Check for docker build error
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -40,6 +42,8 @@ jobs:
 
       - name: Push image to DigitalOcean Container Registry
         run: docker push ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7)
+        
+      - name: Check for docker push error
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -64,6 +68,8 @@ jobs:
 
       - name: Deploy to DigitalOcean Kubernetes
         run: kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml
+        
+      - name: Check for kubectl apply error
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -73,6 +79,8 @@ jobs:
 
       - name: Verify deployment
         run: kubectl rollout status deployment/$REPO_NAME --namespace ${{ github.ref_name }}
+        
+      - name: Check for kubeclt rollout error
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
