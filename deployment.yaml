@@ -17,6 +17,10 @@ spec:
       containers:
       - name: <CONTAINER>
         image: <IMAGE>
+        ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP
         resources:
           requests:
             memory: "16Mi"
@@ -34,7 +38,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - targetPort: 8080
+    - targetPort: http
       port: 8080
   selector:
       app: <DEPLOY-NAME>
@@ -49,6 +53,7 @@ metadata:
   labels:
     name: <DEPLOY-NAME>
 spec:
+  ingressClassName: nginx
   rules:
   - host: <INGRESS-HOST>
     http:
