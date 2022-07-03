@@ -28,15 +28,7 @@ jobs:
 
       - name: Build container image
         id: docker-build
-        run: docker build -t ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
-        
-      - name: Check for docker build error
-        if: failure() && steps.docker-build.outcome == 'failure'
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: 'Dockerfile cannot be built.'
+        run: docker build -t ${{ secrets.REGISTRY_NAME1 }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7) .
 
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 1200
@@ -44,14 +36,6 @@ jobs:
       - name: Push image to DigitalOcean Container Registry
         id: docker-push
         run: docker push ${{ secrets.REGISTRY_NAME }}/$REPO_NAME:$(echo $GITHUB_SHA | head -c7)
-        
-      - name: Check for docker push error
-        if: failure() && steps.docker-push.outcome == 'failure'
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: 'Could not push image to Docker Registry.'
 
       - name: Set image, container and deployment name on placeholder deployment file
         run: | 
@@ -71,7 +55,36 @@ jobs:
       - name: Deploy to DigitalOcean Kubernetes
         id: k8s-apply
         run: kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml
-        
+
+      - name: Verify deployment
+        id: k8s-verify
+        run: kubectl rollout status deployment/$REPO_NAME --namespace ${{ github.ref_name }}
+
+      - name: Discord pipeline completed notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'Workflow {{ GITHUB_WORKFLOW }} with ID {{ GITHUB_RUN_ID }} succeeded.'
+
+        #Checking for failure errors at the end
+
+      - name: Check for docker build error
+        if: failure() && steps.docker-build.outcome == 'failure'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'Dockerfile cannot be built.'
+
+      - name: Check for docker push error
+        if: failure() && steps.docker-push.outcome == 'failure'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'Could not push image to Docker Registry.'
+
       - name: Check for kubectl apply error
         if: failure() && steps.k8s-apply.outcome == 'failure'
         env:
@@ -80,10 +93,6 @@ jobs:
         with:
           args: 'Workflow with ID {{ GITHUB_RUN_ID }} failed. Could not deploy to k8s.'
 
-      - name: Verify deployment
-        id: k8s-verify
-        run: kubectl rollout status deployment/$REPO_NAME --namespace ${{ github.ref_name }}
-        
       - name: Check for kubeclt rollout error
         if: failure() && steps.k8s-verify.outcome == 'failure'
         env:
@@ -91,10 +100,3 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: 'Workflow with ID {{ GITHUB_RUN_ID }} failed. Could not apply rollout.'
-
-      - name: Discord pipeline completed notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: 'Workflow {{ GITHUB_WORKFLOW }} with ID {{ GITHUB_RUN_ID }} succeeded.'
